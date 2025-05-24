@@ -1,50 +1,36 @@
-
 import React, { useState } from "react";
 import "./App.css";
 
 function App() {
-  const [query, setQuery] = useState("");
+  const [question, setQuestion] = useState("");
   const [answer, setAnswer] = useState("");
   const [loading, setLoading] = useState(false);
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
+  const askAI = async () => {
     setLoading(true);
-    setAnswer("");
-
-    try {
-      const res = await fetch("https://your-backend-api-url.com/api/answer", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ question: query }),
-      });
-
-      const data = await res.json();
-      setAnswer(data.answer || "No answer found.");
-    } catch (err) {
-      setAnswer("Error fetching answer.");
-    } finally {
-      setLoading(false);
-    }
+    const res = await fetch("/api/ask", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ question })
+    });
+    const data = await res.json();
+    setAnswer(data.answer);
+    setLoading(false);
   };
 
   return (
     <div className="App">
-      <h1>AI Answer Site</h1>
-      <form onSubmit={handleSubmit}>
-        <input
-          type="text"
-          value={query}
-          onChange={(e) => setQuery(e.target.value)}
-          placeholder="Ask something..."
-        />
-        <button type="submit" disabled={loading}>
-          {loading ? "Loading..." : "Ask"}
-        </button>
-      </form>
-      <div className="answer">{answer}</div>
+      <h1>Ask the AI</h1>
+      <input
+        type="text"
+        value={question}
+        onChange={(e) => setQuestion(e.target.value)}
+        placeholder="Type your question..."
+      />
+      <button onClick={askAI} disabled={loading}>
+        {loading ? "Thinking..." : "Ask"}
+      </button>
+      {answer && <p><strong>AI:</strong> {answer}</p>}
     </div>
   );
 }
